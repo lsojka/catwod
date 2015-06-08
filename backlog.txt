@@ -1,0 +1,9 @@
+all previous stuff done
+
+1. subtituting int for cell structure
+
+2. komórka ma metodę "ożycia" - nadania czasu do aktywacji ze stanu przejsciowego do koncowego
+
+3. pętla wktórej step był jednym przejsciem tablicy,
+staje się pętlą gdzie czas to nowy krok iteracji, przejście jest po "froncie"
+- ergo - "front" jako tablica tego co teraz przeglądamy
