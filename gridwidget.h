@@ -30,14 +30,18 @@ public:
     //QList<int> grid;
     QList<Cell> grid;
 
-    // setup
-    void primitiveSetUp();
+    // frontal
+    double GLOBALTIME;
+    double TIMESTEP;
+    QList<Cell> front;
 
+    // ------------------------------
+    void primitiveSetUp();
     // transistions
     void stateStep();
     int transistion(QList<int> neighbours);
 
-    // basic
+        // basic
     QList<int> checkMoore(int i, int j);
     QList<int> checkVonNeumann(int i, int j);
     void setRuleset(int _r);
@@ -48,7 +52,7 @@ public:
     int getNeighbourhoodType() const;
     void setNeighbourhoodType(int value);
 
-    // advanced
+        // advanced
     QList<int> checkMooreBaggins(int i, int j);
     QList<int> volatileMoore(int i, int j);
     QList<int> volatileVonNeumann(int i, int j);
@@ -69,7 +73,7 @@ public:
     void setVonneumannP(double value);
 
     // ball
-
+    void frontalMoore(int i, int j);
 
 
 private:

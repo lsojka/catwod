@@ -5,7 +5,7 @@
 #include <time.h>
 
 gridwidget::gridwidget(QWidget *parent) :
-    QWidget(parent)
+    QWidget(parent), GLOBALTIME(0)
 {
     qDebug() << "Screen set. h: " << this->height() << " w:" << width();
     qsrand(time(NULL));
@@ -75,63 +75,25 @@ void gridwidget::setPeriodic(bool value)
 }
 
 
-void gridwidget::paintEvent(QPaintEvent *)
-{
-    //qDebug() << "Repaint set. h: " << this->height() << " w:" << width();
-
-    QBrush noBrush("#ffffff");
-    QBrush fullBrush("#27408B");
-    QPainter painter(this);
-
-    //qDebug() << "grid.size = " << grid.size();
-    if(grid.size() > 0)
-    {
-        for(int i = 0; i < this->height(); i++)
-        {
-            for(int j = 0; j < this->width(); j++)
-            {
-                QRect rect(j, i, 1, 1);
-                if(this->grid[i*this->height()+j] == 1) // replace with "alive" clause
-                    painter.fillRect(rect, fullBrush);
-                else if(this->grid[i*this->height()+j] == 0)
-                    painter.fillRect(rect, noBrush);
-                else
-                    painter.fillRect(rect, noBrush);
-            }
-        }
-    }
-}
-
-void gridwidget::primitiveSetUp()
-{
-    this->grid.clear();
-
-    for(int i = 0; i < this->height()*this->width(); i++)
-    {
-        this->grid.append(0);
-    }
-    // specific
-
-    this->grid[400/2*this->width()+ 400/2] = 1;
-
-    this->repaint();
-}
-
 void gridwidget::setRuleset(int _r)
 {
     this->ruleset = _r;
     qDebug() << "Ruleset " << this->ruleset;
 }
 
+double gridwidget::randP()
+{
+    return ((double)(qrand() % 101)) / 100;
+}
 
-
+/*
 QList<int> gridwidget::checkMoore(int i, int j)
 {
-    /*
+
      0|1|2
      3| |5
      6|7|8
-     */
+
     QList<int> neighbours;
     if(this->periodic)
     {
@@ -206,15 +168,12 @@ QList<int> gridwidget::checkMoore(int i, int j)
 
     return neighbours;
 }
+*/
 
-
+/*
 QList<int> gridwidget::checkMooreBaggins(int i, int j)
 {
-    /*
-     0|1|2
-     3| |5
-     6|7|8
-     */
+
     QList<int> neighbours;
     if(this->periodic)
     {
@@ -242,11 +201,6 @@ QList<int> gridwidget::checkMooreBaggins(int i, int j)
 
 QList <int> gridwidget::checkVonNeumann(int i, int j)
 {
-    /*
-      |1|
-     3| |5
-      |7|
-     */
     QList<int> neighbours;
     if(this->periodic)
     {
@@ -295,6 +249,135 @@ QList <int> gridwidget::checkVonNeumann(int i, int j)
     return neighbours;
 }
 
+
+QList<int> gridwidget::volatileMoore(int i, int j)
+{
+
+    QList<int> neighbours;
+    if(this->periodic)
+    {
+        //qDebug() << "0| r "(((i+this->height())-1)%this->height())<< ", " << ((j+this->width())-1)%this->width();
+        //qDebug() << "0| nr "(((i+this->height())-1)%this->height())*this->width() + ((j+this->width())-1)%this->width();
+       //if(i*this->width()+j > 217549)
+            //qDebug() << "Attempt at i,j " << i << "," << j;
+        // 0
+        if(this->grid[ (((i+this->height())-1)%this->height())*this->width() + ((j+this->width())-1)%this->width() ] ==  1 && this->randP() < this->detailP[0])
+            neighbours.append(grid[ (((i+this->height())-1)%this->height())*this->width() + ((j+this->width())-1)%this->width() ]);
+        // 1
+        if(this->grid[ (((i+this->height())-1)%this->height() )*this->width() + ((j+this->width()))%this->width() ] ==  1 && this->randP() < this->detailP[1])
+            neighbours.append(grid[ (((i+this->height())-1)%this->height())*this->width() + ((j+this->width()))%this->width() ]);
+        // 2
+        if(this->grid[ (((i+this->height())-1)%this->height())*this->width() + ((j+this->width())+1)%this->width() ] ==  1 && this->randP() < this->detailP[2])
+            neighbours.append(grid[ (((i+this->height())-1)%this->height())*this->width() + ((j+this->width())+1)%this->width() ]);
+        // 3
+        if(this->grid[ (((i+this->height()))%this->height())*this->width() + ((j+this->width())-1)%this->width() ] ==  1 && this->randP() < this->detailP[3])
+            neighbours.append(grid[ (((i+this->height()))%this->height())*this->width() + ((j+this->width())-1)%this->width() ]);
+        // 5
+        if(this->grid[ (((i+this->height()))%this->height())*this->width() + ((j+this->width())+1)%this->width() ] ==  1 && this->randP() < this->detailP[5])
+            neighbours.append(grid[ (((i+this->height()))%this->height())*this->width() + ((j+this->width())+1)%this->width() ]);
+        // 6
+        if(this->grid[ (((i+this->height())+1)%this->height())*this->width() + ((j+this->width())-1)%this->width() ] ==  1 && this->randP() < this->detailP[6])
+            neighbours.append(grid[ (((i+this->height())+1)%this->height())*this->width() + ((j+this->width())-1)%this->width() ]);
+        // 7
+        if(this->grid[ (((i+this->height())+1)%this->height())*this->width() + ((j+this->width()))%this->width() ] ==  1 && this->randP() < this->detailP[7])
+            neighbours.append(grid[ (((i+this->height())+1)%this->height())*this->width() + ((j+this->width()))%this->width() ]);
+        // 8
+        if(this->grid[ (((i+this->height())+1)%this->height())*this->width() + ((j+this->width())+1)%this->width() ] ==  1 && this->randP() < this->detailP[8])
+            neighbours.append(grid[ (((i+this->height())+1)%this->height())*this->width() + ((j+this->width())+1)%this->width() ]);
+    }
+    else
+    {
+        //if(!( ((i-1)<0) || ((i-1)>rows-1) || ((j-1)<0) || ((j-1)>columns-1) ))
+        //    fellas.append(grid[i-1][j-1]);
+        // 0
+        //qDebug () << "DEBUG 1";
+        if(!( ((i-1)<0) || ((i-1)>this->height()-1) || ((j-1)<0) || ((j-1)>this->width()-1) ))
+            if(grid[ (i-1)*this->width() + (j-1)] ==  1 && this->randP() < this->detailP[0])
+                neighbours.append(grid[ (i-1)*this->width() + (j-1)]);
+        // 1
+        if(!( ((i-1)<0) || ((i-1)>this->height()-1) || ((j)<0) || ((j)>this->width()-1) ))
+            if(grid[ (i-1)*this->width() + (j)] ==  1 && this->randP() < this->detailP[1])
+                neighbours.append(grid[ (i-1)*this->width() + j]);
+        // 2
+        if(!( ((i-1)<0) || ((i-1)>this->height()-1) || ((j+1)<0) || ((j+1)>this->width()-1) ))
+            if(grid[ (i-1)*this->width() + (j+1)] ==  1 && this->randP() < this->detailP[2])
+                neighbours.append(grid[ (i-1)*this->width() + (j+1)]);
+        // 3
+        if(!( ((i)<0) || ((i)>this->height()-1) || ((j-1)<0) || ((j-1)>this->width()-1) ))
+            if(grid[ (i)*this->width() + (j-1)] ==  1 && this->randP() < this->detailP[3])
+            neighbours.append(grid[ i*this->width() + (j-1)]);
+        // 5
+        if(!( ((i)<0) || ((i)>this->height()-1) || ((j+1)<0) || ((j+1)>this->width()-1) ))
+            if(grid[ (i)*this->width() + (j+1)] ==  1 && this->randP() < this->detailP[5])
+                neighbours.append(grid[ i*this->width() + (j+1)]);
+        // 6
+        if(!( ((i+1)<0) || ((i+1)>this->height()-1) || ((j-1)<0) || ((j-1)>this->width()-1) ))
+            if(grid[ (i+1)*this->width() + (j-1)] ==  1 && this->randP() < this->detailP[6])
+                neighbours.append(grid[ (i+1)*this->width() + (j-1)]);
+        // 7
+        if(!( ((i+1)<0) || ((i+1)>this->height()-1) || ((j)<0) || ((j)>this->width()-1) ))
+            if(grid[ (i+1)*this->width() + (j)] ==  1 && this->randP() < this->detailP[7])
+                neighbours.append(grid[ (i+1)*this->width() + (j)]);
+        // 8
+        if(!( ((i+1)<0) || ((i+1)>this->height()-1) || ((j+1)<0) || ((j+1)>this->width()-1) ))
+            if(grid[ (i+1)*this->width() + (j+1)] ==  1 && this->randP() < this->detailP[8])
+                neighbours.append(grid[ (i+1)*this->width() + (j+1)]);
+        //qDebug () << "DEBUG 2";
+    }
+
+    return neighbours;
+}
+
+QList<int> gridwidget::volatileVonNeumann(int i, int j)
+{
+
+    QList<int> neighbours;
+    if(this->periodic)
+    {
+        //qDebug() << "0| r "(((i+this->height())-1)%this->height())<< ", " << ((j+this->width())-1)%this->width();
+        //qDebug() << "0| nr "(((i+this->height())-1)%this->height())*this->width() + ((j+this->width())-1)%this->width();
+       //if(i*this->width()+j > 217549)
+            //qDebug() << "Attempt at i,j " << i << "," << j;
+        // 1
+        if(this->grid[ (((i+this->height())-1)%this->height() )*this->width() + ((j+this->width()))%this->width() ] ==  1 && this->randP() < this->detailP[1])
+            neighbours.append(grid[ (((i+this->height())-1)%this->height())*this->width() + ((j+this->width()))%this->width() ]);
+        // 3
+        if(this->grid[ (((i+this->height()))%this->height())*this->width() + ((j+this->width())-1)%this->width() ] ==  1 && this->randP() < this->detailP[3])
+            neighbours.append(grid[ (((i+this->height()))%this->height())*this->width() + ((j+this->width())-1)%this->width() ]);
+        // 5
+        if(this->grid[ (((i+this->height()))%this->height())*this->width() + ((j+this->width())+1)%this->width() ] ==  1 && this->randP() < this->detailP[5])
+            neighbours.append(grid[ (((i+this->height()))%this->height())*this->width() + ((j+this->width())+1)%this->width() ]);
+        // 7
+        if(this->grid[ (((i+this->height())+1)%this->height())*this->width() + ((j+this->width()))%this->width() ] ==  1 && this->randP() < this->detailP[7])
+            neighbours.append(grid[ (((i+this->height())+1)%this->height())*this->width() + ((j+this->width()))%this->width() ]);
+    }
+    else
+    {
+        //if(!( ((i-1)<0) || ((i-1)>rows-1) || ((j-1)<0) || ((j-1)>columns-1) ))
+        //    fellas.append(grid[i-1][j-1]);
+        // 1
+        if(!( ((i-1)<0) || ((i-1)>this->height()-1) || ((j)<0) || ((j)>this->width()-1) ))
+            if(grid[ (i-1)*this->width() + (j)] ==  1 && this->randP() < this->detailP[1])
+                neighbours.append(grid[ (i-1)*this->width() + j]);
+        // 3
+        if(!( ((i)<0) || ((i)>this->height()-1) || ((j-1)<0) || ((j-1)>this->width()-1) ))
+            if(grid[ (i)*this->width() + (j-1)] ==  1 && this->randP() < this->detailP[3])
+            neighbours.append(grid[ i*this->width() + (j-1)]);
+        // 5
+        if(!( ((i)<0) || ((i)>this->height()-1) || ((j+1)<0) || ((j+1)>this->width()-1) ))
+            if(grid[ (i)*this->width() + (j+1)] ==  1 && this->randP() < this->detailP[5])
+                neighbours.append(grid[ i*this->width() + (j+1)]);
+        // 7
+        if(!( ((i+1)<0) || ((i+1)>this->height()-1) || ((j)<0) || ((j)>this->width()-1) ))
+            if(grid[ (i+1)*this->width() + (j)] ==  1 && this->randP() < this->detailP[7])
+                neighbours.append(grid[ (i+1)*this->width() + (j)]);
+    }
+
+    return neighbours;
+}
+*/
+
+/*
 void gridwidget::stateStep()
 {
     //qDebug() << "Growth step";
@@ -306,12 +389,6 @@ void gridwidget::stateStep()
     // advanced increments per iteration
     this->setTicker(this->getTicker()+1);
 
-    /*
-    if(this->getTicker() % 2 == 1)
-        qDebug() << "Ticker even, = " << this->getTicker() << " , Moore.";
-    else if(this->ticker % 2 == 0)
-        qDebug() << "Ticker even, = " << this->getTicker() << " , VonNeumann.";
-    */
 
     // walk through old states to determine new ones
     for(int i = 0; i < this->height(); i++)
@@ -569,143 +646,318 @@ void gridwidget::stateStep()
     _grid.clear();
     neighbors.clear();
 }
+*/
 
-// write ranP
-double gridwidget::randP()
+void gridwidget::primitiveSetUp()
 {
-    return ((double)(qrand() % 101)) / 100;
+    this->grid.clear();
+/*
+    for(int i = 0; i < this->height()*this->width(); i++)
+    {
+        this->grid.append(0);
+    }
+*/
+    for(int i = 0; i < this->height(); i++)
+    {
+        for(int j = 0; j < this->width(); j++)
+        {
+            Cell cell;
+            cell.x = i;
+            cell.y = j;
+            cell.setState(0);
+
+            this->grid.append(cell);
+        }
+    }
+
+    this->grid[400/2*this->width()+ 400/2].setState(2);
+    //qDebug() << "front.length = " << this->front.length();
+    // frontal moore here., so front.lenght goes from 0 to something
+    //this->frontalMoore(400/2, 400/2);
+    // crude debug -> print front values here... or in frotnalMoore
+    //qDebug() << "front.length = " << this->front.length();
+
+    this->repaint();
 }
 
-QList<int> gridwidget::volatileMoore(int i, int j)
+void gridwidget::paintEvent(QPaintEvent *)
 {
-    /*
-     0|1|2
-     3| |5
-     6|7|8
-     */
-    QList<int> neighbours;
+    //qDebug() << "Repaint set. h: " << this->height() << " w:" << width();
+
+    QBrush noBrush("#ffffff");
+    QBrush halfBrush("#B94E48");
+    QBrush fullBrush("#882D17");
+    QPainter painter(this);
+
+    //qDebug() << "grid.size = " << grid.size();
+    if(grid.size() > 0)
+    {
+        for(int i = 0; i < this->height(); i++)
+        {
+            for(int j = 0; j < this->width(); j++)
+            {
+                QRect rect(j, i, 1, 1);
+                if(this->grid[i*this->width()+j].getState() == 2 )
+                    painter.fillRect(rect, fullBrush);
+                else if(this->grid[i*this->width()+j].getState() == 1)
+                    painter.fillRect(rect, halfBrush);
+                else
+                    painter.fillRect(rect, noBrush);
+            }
+        }
+    }
+}
+
+
+
+void gridwidget::stateStep()
+{
+// change to parameter
+    //qDebug() << "Globaltime " << this->GLOBALTIME;
+    if(this->GLOBALTIME == 0)
+    {
+        for(int i = 0; i<this->height(); i++)
+        {
+            for(int j = 0; j<this->width(); j++)
+            {
+                if(grid[i*this->width()+j].getState() == 2)
+                {
+                    qDebug() << "Supposed initial";
+                    this->frontalMoore(i, j);
+                }
+            }
+        }
+    }
+
+    this->GLOBALTIME += 0.2;
+    for(int i = 0; i < this->front.length(); i++)
+    {
+        if(front[i].time < this->GLOBALTIME)
+        {
+            //qDebug() << "Pop! x = " << front[i].x << " y = " << front[i].y;
+            // zamień go na state 2
+            grid[front[i].x*this->width()+front[i].y].setState(2);
+            // wrzuć martwych (==0) sąsiadów na front
+            this->frontalMoore(front[i].x, front[i].y);
+            // wychodzi z frontu, koniec zmian
+            front.removeAt(i);
+        }
+    }
+    //qDebug() << "Globaltime = " << this->GLOBALTIME;
+    //qDebug() << "front.size = " << front.size();
+}
+
+void gridwidget::frontalMoore(int i, int j)
+{
+
+    //QList<Cell> neighbours;
+    int current;
+
+    // if the nieghbour is "0", put'm on the front
+
     if(this->periodic)
     {
-        //qDebug() << "0| r "(((i+this->height())-1)%this->height())<< ", " << ((j+this->width())-1)%this->width();
-        //qDebug() << "0| nr "(((i+this->height())-1)%this->height())*this->width() + ((j+this->width())-1)%this->width();
-       //if(i*this->width()+j > 217549)
-            //qDebug() << "Attempt at i,j " << i << "," << j;
         // 0
-        if(this->grid[ (((i+this->height())-1)%this->height())*this->width() + ((j+this->width())-1)%this->width() ] ==  1 && this->randP() < this->detailP[0])
-            neighbours.append(grid[ (((i+this->height())-1)%this->height())*this->width() + ((j+this->width())-1)%this->width() ]);
+        current = (((i+this->height())-1)%this->height())*this->width() + ((j+this->width())-1)%this->width();
+        if(this->grid[ current ].state == 0)
+        {
+            grid[ current ].setState(1);
+            //grid[ current ].assignTime(i, j, this->GLOBALTIME);
+            grid[ current ].assignTime(this->height()/2, this->width()/2, this->GLOBALTIME);
+            front.append(grid[ current ]);
+        }
         // 1
-        if(this->grid[ (((i+this->height())-1)%this->height() )*this->width() + ((j+this->width()))%this->width() ] ==  1 && this->randP() < this->detailP[1])
-            neighbours.append(grid[ (((i+this->height())-1)%this->height())*this->width() + ((j+this->width()))%this->width() ]);
+        current = (((i+this->height())-1)%this->height() )*this->width() + ((j+this->width()))%this->width();
+        if(this->grid[ current ].state == 0)
+        {
+            grid[ current ].setState(1);
+            //grid[ current ].assignTime(i, j, this->GLOBALTIME);
+            grid[ current ].assignTime(this->height()/2, this->width()/2, this->GLOBALTIME);
+            front.append(grid[ current ]);
+        }
+
         // 2
-        if(this->grid[ (((i+this->height())-1)%this->height())*this->width() + ((j+this->width())+1)%this->width() ] ==  1 && this->randP() < this->detailP[2])
-            neighbours.append(grid[ (((i+this->height())-1)%this->height())*this->width() + ((j+this->width())+1)%this->width() ]);
+        current = (((i+this->height())-1)%this->height())*this->width() + ((j+this->width())+1)%this->width();
+        if(this->grid[ current ].state == 0)
+        {
+            grid[ current ].setState(1);
+            //grid[ current ].assignTime(i, j, this->GLOBALTIME);
+            grid[ current ].assignTime(this->height()/2, this->width()/2, this->GLOBALTIME);
+            front.append(grid[ current ]);
+        }
+
         // 3
-        if(this->grid[ (((i+this->height()))%this->height())*this->width() + ((j+this->width())-1)%this->width() ] ==  1 && this->randP() < this->detailP[3])
-            neighbours.append(grid[ (((i+this->height()))%this->height())*this->width() + ((j+this->width())-1)%this->width() ]);
+        current = (((i+this->height()))%this->height())*this->width() + ((j+this->width())-1)%this->width();
+        if(this->grid[ current ].state == 0)
+        {
+            grid[ current ].setState(1);
+            //grid[ current ].assignTime(i, j, this->GLOBALTIME);
+            grid[ current ].assignTime(this->height()/2, this->width()/2, this->GLOBALTIME);
+            front.append(grid[ current ]);
+        }
+
         // 5
-        if(this->grid[ (((i+this->height()))%this->height())*this->width() + ((j+this->width())+1)%this->width() ] ==  1 && this->randP() < this->detailP[5])
-            neighbours.append(grid[ (((i+this->height()))%this->height())*this->width() + ((j+this->width())+1)%this->width() ]);
+        current = (((i+this->height()))%this->height())*this->width() + ((j+this->width())+1)%this->width();
+        if(this->grid[ current ].state == 0)
+        {
+            grid[ current ].setState(1);
+            //grid[ current ].assignTime(i, j, this->GLOBALTIME);
+            grid[ current ].assignTime(this->height()/2, this->width()/2, this->GLOBALTIME);
+            front.append(grid[ current ]);
+        }
+
         // 6
-        if(this->grid[ (((i+this->height())+1)%this->height())*this->width() + ((j+this->width())-1)%this->width() ] ==  1 && this->randP() < this->detailP[6])
-            neighbours.append(grid[ (((i+this->height())+1)%this->height())*this->width() + ((j+this->width())-1)%this->width() ]);
+        current = (((i+this->height())+1)%this->height())*this->width() + ((j+this->width())-1)%this->width();
+        if(this->grid[ current ].state == 0)
+        {
+            grid[ current ].setState(1);
+            //grid[ current ].assignTime(i, j, this->GLOBALTIME);
+            grid[ current ].assignTime(this->height()/2, this->width()/2, this->GLOBALTIME);
+            front.append(grid[ current ]);
+        }
+
         // 7
-        if(this->grid[ (((i+this->height())+1)%this->height())*this->width() + ((j+this->width()))%this->width() ] ==  1 && this->randP() < this->detailP[7])
-            neighbours.append(grid[ (((i+this->height())+1)%this->height())*this->width() + ((j+this->width()))%this->width() ]);
+        current = (((i+this->height())+1)%this->height())*this->width() + ((j+this->width()))%this->width();
+        if(this->grid[ current ].state == 0)
+        {
+            grid[ current ].setState(1);
+            //grid[ current ].assignTime(i, j, this->GLOBALTIME);
+            grid[ current ].assignTime(this->height()/2, this->width()/2, this->GLOBALTIME);
+            front.append(grid[ current ]);
+        }
+
         // 8
-        if(this->grid[ (((i+this->height())+1)%this->height())*this->width() + ((j+this->width())+1)%this->width() ] ==  1 && this->randP() < this->detailP[8])
-            neighbours.append(grid[ (((i+this->height())+1)%this->height())*this->width() + ((j+this->width())+1)%this->width() ]);
+        current = (((i+this->height())+1)%this->height())*this->width() + ((j+this->width())+1)%this->width();
+        if(this->grid[ current ].state == 0)
+        {
+            grid[ current ].setState(1);
+            //grid[ current ].assignTime(i, j, this->GLOBALTIME);
+            grid[ current ].assignTime(this->height()/2, this->width()/2, this->GLOBALTIME);
+            front.append(grid[ current ]);
+        }
     }
     else
     {
-        //if(!( ((i-1)<0) || ((i-1)>rows-1) || ((j-1)<0) || ((j-1)>columns-1) ))
-        //    fellas.append(grid[i-1][j-1]);
         // 0
         //qDebug () << "DEBUG 1";
         if(!( ((i-1)<0) || ((i-1)>this->height()-1) || ((j-1)<0) || ((j-1)>this->width()-1) ))
-            if(grid[ (i-1)*this->width() + (j-1)] ==  1 && this->randP() < this->detailP[0])
-                neighbours.append(grid[ (i-1)*this->width() + (j-1)]);
+        {
+            current = (i-1)*this->width() + (j-1);
+            if(grid[ current ].state ==  0)
+            {
+
+                grid[ current ].setState(1);
+                //grid[ current ].assignTime(i, j, this->GLOBALTIME);
+                grid[ current ].assignTime(this->height()/2, this->width()/2, this->GLOBALTIME);
+                front.append(grid[ current ]);
+            }
+        }
+
+        //neighbours.append(grid[ (i-1)*this->width() + (j-1)]);
         // 1
         if(!( ((i-1)<0) || ((i-1)>this->height()-1) || ((j)<0) || ((j)>this->width()-1) ))
-            if(grid[ (i-1)*this->width() + (j)] ==  1 && this->randP() < this->detailP[1])
-                neighbours.append(grid[ (i-1)*this->width() + j]);
+        {
+            current = (i-1)*this->width() + (j);
+            if(grid[ current ].state ==  0)
+            {
+                grid[ current ].setState(1);
+                //grid[ current ].assignTime(i, j, this->GLOBALTIME);
+                grid[ current ].assignTime(this->height()/2, this->width()/2, this->GLOBALTIME);
+                front.append(grid[ current ]);
+            }
+        }
+            //if(grid[ (i-1)*this->width() + (j)] ==  1)
+            //    neighbours.append(grid[ (i-1)*this->width() + j]);
         // 2
         if(!( ((i-1)<0) || ((i-1)>this->height()-1) || ((j+1)<0) || ((j+1)>this->width()-1) ))
-            if(grid[ (i-1)*this->width() + (j+1)] ==  1 && this->randP() < this->detailP[2])
-                neighbours.append(grid[ (i-1)*this->width() + (j+1)]);
+        {
+            current = (i-1)*this->width() + (j+1);
+            if(grid[ current ].state ==  0)
+            {
+                grid[ current ].setState(1);
+                //grid[ current ].assignTime(i, j, this->GLOBALTIME);
+                grid[ current ].assignTime(this->height()/2, this->width()/2, this->GLOBALTIME);
+                front.append(grid[ current ]);
+            }
+        }
+
+            //if(grid[ (i-1)*this->width() + (j+1)] ==  1)
+            //    neighbours.append(grid[ (i-1)*this->width() + (j+1)]);
         // 3
         if(!( ((i)<0) || ((i)>this->height()-1) || ((j-1)<0) || ((j-1)>this->width()-1) ))
-            if(grid[ (i)*this->width() + (j-1)] ==  1 && this->randP() < this->detailP[3])
-            neighbours.append(grid[ i*this->width() + (j-1)]);
+        {
+            current = (i)*this->width() + (j-1);
+            if(grid[ current ].state ==  0)
+            {
+                grid[ current ].setState(1);
+                //grid[ current ].assignTime(i, j, this->GLOBALTIME);
+                grid[ current ].assignTime(this->height()/2, this->width()/2, this->GLOBALTIME);
+                front.append(grid[ current ]);
+            }
+        }
+
+            //if(grid[ (i)*this->width() + (j-1)] ==  1)
+            //neighbours.append(grid[ i*this->width() + (j-1)]);
         // 5
         if(!( ((i)<0) || ((i)>this->height()-1) || ((j+1)<0) || ((j+1)>this->width()-1) ))
-            if(grid[ (i)*this->width() + (j+1)] ==  1 && this->randP() < this->detailP[5])
-                neighbours.append(grid[ i*this->width() + (j+1)]);
+        {
+            current = (i)*this->width() + (j+1);
+            if(grid[ current ].state ==  0)
+            {
+                grid[ current ].setState(1);
+                //grid[ current ].assignTime(i, j, this->GLOBALTIME);
+                grid[ current ].assignTime(this->height()/2, this->width()/2, this->GLOBALTIME);
+                front.append(grid[ current ]);
+            }
+        }
+            //if(grid[ (i)*this->width() + (j+1)] ==  1)
+            //    neighbours.append(grid[ i*this->width() + (j+1)]);
         // 6
         if(!( ((i+1)<0) || ((i+1)>this->height()-1) || ((j-1)<0) || ((j-1)>this->width()-1) ))
-            if(grid[ (i+1)*this->width() + (j-1)] ==  1 && this->randP() < this->detailP[6])
-                neighbours.append(grid[ (i+1)*this->width() + (j-1)]);
+        {
+            current = (i+1)*this->width() + (j-1);
+            if(grid[ current ].state ==  0)
+            {
+                grid[ current ].setState(1);
+                //grid[ current ].assignTime(i, j, this->GLOBALTIME);
+                grid[ current ].assignTime(this->height()/2, this->width()/2, this->GLOBALTIME);
+                front.append(grid[ current ]);
+            }
+        }
+            //if(grid[ (i+1)*this->width() + (j-1)] ==  1)
+            //    neighbours.append(grid[ (i+1)*this->width() + (j-1)]);
         // 7
         if(!( ((i+1)<0) || ((i+1)>this->height()-1) || ((j)<0) || ((j)>this->width()-1) ))
-            if(grid[ (i+1)*this->width() + (j)] ==  1 && this->randP() < this->detailP[7])
-                neighbours.append(grid[ (i+1)*this->width() + (j)]);
+        {
+            current = (i+1)*this->width() + (j);
+            if(grid[ current ].state ==  0)
+            {
+                grid[ current ].setState(1);
+                //grid[ current ].assignTime(i, j, this->GLOBALTIME);
+                grid[ current ].assignTime(this->height()/2, this->width()/2, this->GLOBALTIME);
+                front.append(grid[ current ]);
+            }
+        }
+
+            //if(grid[ (i+1)*this->width() + (j)] ==  1)
+            //    neighbours.append(grid[ (i+1)*this->width() + (j)]);
         // 8
         if(!( ((i+1)<0) || ((i+1)>this->height()-1) || ((j+1)<0) || ((j+1)>this->width()-1) ))
-            if(grid[ (i+1)*this->width() + (j+1)] ==  1 && this->randP() < this->detailP[8])
-                neighbours.append(grid[ (i+1)*this->width() + (j+1)]);
+        {
+            current = (i+1)*this->width() + (j+1);
+            if(grid[ current ].state ==  0)
+            {
+                grid[ current ].setState(1);
+                //grid[ current ].assignTime(i, j, this->GLOBALTIME);
+                grid[ current ].assignTime(this->height()/2, this->width()/2, this->GLOBALTIME);
+                front.append(grid[ current ]);
+            }
+        }
+
+            //if(grid[ (i+1)*this->width() + (j+1)] ==  1)
+            //    neighbours.append(grid[ (i+1)*this->width() + (j+1)]);
         //qDebug () << "DEBUG 2";
     }
 
-    return neighbours;
-}
-
-QList<int> gridwidget::volatileVonNeumann(int i, int j)
-{
-    /*
-      |1|
-     3| |5
-      |7|
-     */
-    QList<int> neighbours;
-    if(this->periodic)
-    {
-        //qDebug() << "0| r "(((i+this->height())-1)%this->height())<< ", " << ((j+this->width())-1)%this->width();
-        //qDebug() << "0| nr "(((i+this->height())-1)%this->height())*this->width() + ((j+this->width())-1)%this->width();
-       //if(i*this->width()+j > 217549)
-            //qDebug() << "Attempt at i,j " << i << "," << j;
-        // 1
-        if(this->grid[ (((i+this->height())-1)%this->height() )*this->width() + ((j+this->width()))%this->width() ] ==  1 && this->randP() < this->detailP[1])
-            neighbours.append(grid[ (((i+this->height())-1)%this->height())*this->width() + ((j+this->width()))%this->width() ]);
-        // 3
-        if(this->grid[ (((i+this->height()))%this->height())*this->width() + ((j+this->width())-1)%this->width() ] ==  1 && this->randP() < this->detailP[3])
-            neighbours.append(grid[ (((i+this->height()))%this->height())*this->width() + ((j+this->width())-1)%this->width() ]);
-        // 5
-        if(this->grid[ (((i+this->height()))%this->height())*this->width() + ((j+this->width())+1)%this->width() ] ==  1 && this->randP() < this->detailP[5])
-            neighbours.append(grid[ (((i+this->height()))%this->height())*this->width() + ((j+this->width())+1)%this->width() ]);
-        // 7
-        if(this->grid[ (((i+this->height())+1)%this->height())*this->width() + ((j+this->width()))%this->width() ] ==  1 && this->randP() < this->detailP[7])
-            neighbours.append(grid[ (((i+this->height())+1)%this->height())*this->width() + ((j+this->width()))%this->width() ]);
-    }
-    else
-    {
-        //if(!( ((i-1)<0) || ((i-1)>rows-1) || ((j-1)<0) || ((j-1)>columns-1) ))
-        //    fellas.append(grid[i-1][j-1]);
-        // 1
-        if(!( ((i-1)<0) || ((i-1)>this->height()-1) || ((j)<0) || ((j)>this->width()-1) ))
-            if(grid[ (i-1)*this->width() + (j)] ==  1 && this->randP() < this->detailP[1])
-                neighbours.append(grid[ (i-1)*this->width() + j]);
-        // 3
-        if(!( ((i)<0) || ((i)>this->height()-1) || ((j-1)<0) || ((j-1)>this->width()-1) ))
-            if(grid[ (i)*this->width() + (j-1)] ==  1 && this->randP() < this->detailP[3])
-            neighbours.append(grid[ i*this->width() + (j-1)]);
-        // 5
-        if(!( ((i)<0) || ((i)>this->height()-1) || ((j+1)<0) || ((j+1)>this->width()-1) ))
-            if(grid[ (i)*this->width() + (j+1)] ==  1 && this->randP() < this->detailP[5])
-                neighbours.append(grid[ i*this->width() + (j+1)]);
-        // 7
-        if(!( ((i+1)<0) || ((i+1)>this->height()-1) || ((j)<0) || ((j)>this->width()-1) ))
-            if(grid[ (i+1)*this->width() + (j)] ==  1 && this->randP() < this->detailP[7])
-                neighbours.append(grid[ (i+1)*this->width() + (j)]);
-    }
-
-    return neighbours;
+    //return neighbours;
 }

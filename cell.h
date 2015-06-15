@@ -9,10 +9,11 @@ public:
     int x;
     int y;
     int state; // 0, 1, 2
+    int grain;
     double time;
 
     Cell();
-    void assignTime(int _x, int _y);
+    void assignTime(int _x, int _y, double _TIME);
     // method of calculcating the time
     // IN - (_x, _y) referentional ones
 
