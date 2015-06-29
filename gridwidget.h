@@ -35,6 +35,11 @@ public:
     double TIMESTEP;
     QList<Cell> front;
 
+    // multigrain
+    QList<QColor> grains;
+    QList<int> grainsx;
+    QList<int> grainsy;
+
     // ------------------------------
     void primitiveSetUp();
     // transistions
@@ -42,7 +47,7 @@ public:
     int transistion(QList<int> neighbours);
 
         // basic
-    QList<int> checkMoore(int i, int j);
+    //QList<int> checkMoore(int i, int j);
     QList<int> checkVonNeumann(int i, int j);
     void setRuleset(int _r);
 
@@ -73,7 +78,12 @@ public:
     void setVonneumannP(double value);
 
     // ball
-    void frontalMoore(int i, int j);
+    void frontalMoore(int i, int j, int ci, int cj);
+
+    // multigrain
+    QList<Cell> checkMoore(int i, int j);
+
+    void addGrain();
 
 
 private:
