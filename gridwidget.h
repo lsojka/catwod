@@ -78,10 +78,11 @@ public:
     void setVonneumannP(double value);
 
     // ball
-    void frontalMoore(int i, int j, int ci, int cj);
+    //void frontalMoore(int i, int j, int ci, int cj);
 
     // multigrain
     QList<Cell> checkMoore(int i, int j);
+    void multigrainMoore(int i, int j, int ci, int cj);
 
     void addGrain();
 

@@ -13,7 +13,7 @@ public:
     double time;
 
     Cell();
-    void assignTime(int _x, int _y, double _TIME);
+    void assignTime(int _x, int _y, double _TIME, int height, int width, bool periodic);
     // method of calculcating the time
     // IN - (_x, _y) referentional ones
 
